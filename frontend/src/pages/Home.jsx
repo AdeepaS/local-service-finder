@@ -1,30 +1,27 @@
+import { useEffect, useState } from 'react'
 import ServiceCard from '../components/ServiceCard'
-
-const featuredServices = [
-  {
-    id: '1',
-    title: 'QuickFix Plumbing',
-    category: 'Plumbing',
-    location: 'Downtown',
-    rating: '4.7/5',
-  },
-  {
-    id: '2',
-    title: 'BrightSpark Electricians',
-    category: 'Electrical',
-    location: 'West End',
-    rating: '4.5/5',
-  },
-  {
-    id: '3',
-    title: 'FreshHome Cleaning',
-    category: 'Cleaning',
-    location: 'North Side',
-    rating: '4.8/5',
-  },
-]
+import { fetchServices } from '../services/api'
 
 function Home() {
+  const [services, setServices] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        const data = await fetchServices()
+        setServices(data)
+      } catch (error) {
+        console.error('Error loading services:', error)
+        setServices([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadServices()
+  }, [])
+
   return (
     <div className="container page">
       <section className="hero-section">
@@ -43,12 +40,25 @@ function Home() {
       </section>
 
       <section>
-        <h2>Featured Services</h2>
-        <div className="service-grid">
-          {featuredServices.map((service) => (
-            <ServiceCard key={service.id} {...service} />
-          ))}
-        </div>
+        <h2>Available Services</h2>
+
+        {isLoading ? <p>Loading services...</p> : null}
+
+        {!isLoading && services.length === 0 ? <p>No services available</p> : null}
+
+        {!isLoading && services.length > 0 ? (
+          <div className="service-grid">
+            {services.map((service) => (
+              <ServiceCard
+                key={service._id}
+                title={service.title}
+                category={service.category}
+                location={service.location}
+                priceRange={service.priceRange}
+              />
+            ))}
+          </div>
+        ) : null}
       </section>
     </div>
   )

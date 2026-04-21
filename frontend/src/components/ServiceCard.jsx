@@ -1,6 +1,4 @@
-import { Link } from 'react-router-dom'
-
-function ServiceCard({ id, title, category, location, rating }) {
+function ServiceCard({ title, category, location, priceRange }) {
   return (
     <article className="service-card">
       <h3>{title}</h3>
@@ -11,11 +9,8 @@ function ServiceCard({ id, title, category, location, rating }) {
         <strong>Location:</strong> {location}
       </p>
       <p>
-        <strong>Rating:</strong> {rating}
+        <strong>Price Range:</strong> {priceRange}
       </p>
-      <Link to={`/services/${id}`} className="card-link">
-        View Details
-      </Link>
     </article>
   )
 }
