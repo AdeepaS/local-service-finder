@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import ServiceCard from '../components/ServiceCard'
+import ServiceCard from '../components/service/ServiceCard'
 import { fetchServices } from '../services/api'
 
 function Home() {

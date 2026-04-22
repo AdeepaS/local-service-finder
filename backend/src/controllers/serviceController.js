@@ -1,27 +1,27 @@
 const Service = require('../models/Service')
 
 // Return all services for the initial listing page.
-const getAllServices = async (req, res) => {
+const getAllServices = async (req, res, next) => {
   try {
     const services = await Service.find().sort({ createdAt: -1 })
     res.status(200).json(services)
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch services', error: error.message })
+    next(error)
   }
 }
 
 // Create a single service document from request body.
-const createService = async (req, res) => {
+const createService = async (req, res, next) => {
   try {
     const service = await Service.create(req.body)
     res.status(201).json(service)
   } catch (error) {
-    res.status(400).json({ message: 'Failed to create service', error: error.message })
+    next(error)
   }
 }
 
 // Temporary helper to seed sample records for local development.
-const seedServices = async (req, res) => {
+const seedServices = async (req, res, next) => {
   try {
     const sampleServices = [
       {
@@ -52,7 +52,7 @@ const seedServices = async (req, res) => {
 
     res.status(201).json({ message: 'Sample services seeded', count: created.length })
   } catch (error) {
-    res.status(500).json({ message: 'Failed to seed services', error: error.message })
+    next(error)
   }
 }
 
