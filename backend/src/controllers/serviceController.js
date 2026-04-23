@@ -1,6 +1,6 @@
-const Service = require('../models/Service')
+const Service = require('../models/service')
 
-// Return all services for the initial listing page.
+// Get all services
 const getAllServices = async (req, res, next) => {
   try {
     const services = await Service.find().sort({ createdAt: -1 })
@@ -10,7 +10,7 @@ const getAllServices = async (req, res, next) => {
   }
 }
 
-// Create a single service document from request body.
+// Create a new service
 const createService = async (req, res, next) => {
   try {
     const service = await Service.create(req.body)
@@ -20,44 +20,7 @@ const createService = async (req, res, next) => {
   }
 }
 
-// Temporary helper to seed sample records for local development.
-const seedServices = async (req, res, next) => {
-  try {
-    const sampleServices = [
-      {
-        title: 'QuickFix Plumbing',
-        category: 'Plumbing',
-        description: 'Leak repair, pipe installation, and emergency plumbing support.',
-        location: 'Downtown',
-        priceRange: '$$',
-      },
-      {
-        title: 'BrightSpark Electricians',
-        category: 'Electrical',
-        description: 'Home wiring, lighting upgrades, and electrical safety checks.',
-        location: 'West End',
-        priceRange: '$$$',
-      },
-      {
-        title: 'FreshHome Cleaning',
-        category: 'Cleaning',
-        description: 'Regular home cleaning and deep-clean packages for apartments.',
-        location: 'North Side',
-        priceRange: '$$',
-      },
-    ]
-
-    await Service.deleteMany({})
-    const created = await Service.insertMany(sampleServices)
-
-    res.status(201).json({ message: 'Sample services seeded', count: created.length })
-  } catch (error) {
-    next(error)
-  }
-}
-
 module.exports = {
   getAllServices,
   createService,
-  seedServices,
 }
