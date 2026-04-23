@@ -1,13 +1,16 @@
 const mongoose = require('mongoose')
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/local-service-finder'
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/local_service_finder'
 
 const connectDb = async () => {
   try {
     await mongoose.connect(MONGO_URI)
-    console.log('Connected to MongoDB')
+
+    console.log('✓ Connected to MongoDB')
+    console.log(`  Database: ${mongoose.connection.name}`)
+    console.log(`  Host: ${mongoose.connection.host}`)
   } catch (error) {
-    console.error('Failed to connect to MongoDB:', error.message)
+    console.error('✗ Failed to connect to MongoDB:', error.message)
     throw error
   }
 }

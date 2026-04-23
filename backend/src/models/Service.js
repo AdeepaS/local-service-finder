@@ -16,7 +16,7 @@ const serviceSchema = new mongoose.Schema(
     providerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Provider ID is required'],
+      //required: [true, 'Provider ID is required'],
     },
 
     // Service information
