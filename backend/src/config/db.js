@@ -1,16 +1,18 @@
 const mongoose = require('mongoose')
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/local_service_finder'
+const MONGO_URI = process.env.MONGO_URI
 
 const connectDb = async () => {
+  if (!MONGO_URI) {
+    throw new Error('MONGO_URI is not set in environment variables')
+  }
+
   try {
     await mongoose.connect(MONGO_URI)
 
-    console.log('✓ Connected to MongoDB')
-    console.log(`  Database: ${mongoose.connection.name}`)
-    console.log(`  Host: ${mongoose.connection.host}`)
+    console.log('MongoDB connected')
   } catch (error) {
-    console.error('✗ Failed to connect to MongoDB:', error.message)
+    console.error('MongoDB connection failed:', error.message)
     throw error
   }
 }

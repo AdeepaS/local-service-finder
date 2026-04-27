@@ -9,6 +9,7 @@ app.use(cors())
 app.use(express.json())
 
 app.use('/api/services', serviceRoutes)
+app.use('/api/v1/services', serviceRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
