@@ -1,6 +1,6 @@
 const express = require('express')
 const {
-  getAllServices,
+  getServices,
   getServiceById,
   createService,
 } = require('../controllers/serviceController')
@@ -8,7 +8,7 @@ const {
 const router = express.Router()
 
 router.get('/:id', getServiceById)
-router.get('/', getAllServices)
+router.get('/', getServices)
 router.post('/', createService)
 
 module.exports = router

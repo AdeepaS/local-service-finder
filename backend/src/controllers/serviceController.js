@@ -3,13 +3,50 @@ const Service = require('../models/service')
 const Review = require('../models/review')
 const asyncHandler = require('../middleware/asyncHandler')
 
-// Get all services
-const getAllServices = asyncHandler(async (req, res) => {
-  const services = await Service.find().sort({ createdAt: -1 })
+// Escape user input before building a regex.
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+// Get services with optional search, filters, and pagination.
+const getServices = asyncHandler(async (req, res) => {
+  const { search, category, location } = req.query
+
+  const page = Math.max(Number.parseInt(req.query.page, 10) || 1, 1)
+  const limit = Math.max(Number.parseInt(req.query.limit, 10) || 10, 1)
+  const skip = (page - 1) * limit
+
+  // Build the query dynamically so only provided filters are applied.
+  const filter = { isActive: true }
+
+  if (search) {
+    filter.title = { $regex: escapeRegExp(search), $options: 'i' }
+  }
+
+  if (category) {
+    filter.category = category
+  }
+
+  if (location) {
+    filter.location = { $regex: escapeRegExp(location), $options: 'i' }
+  }
+
+  // Count first so pagination metadata reflects the filtered dataset.
+  const [total, services] = await Promise.all([
+    Service.countDocuments(filter),
+    Service.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+  ])
+
+  const pages = total === 0 ? 0 : Math.ceil(total / limit)
 
   res.status(200).json({
     success: true,
-    data: services,
+    data: {
+      services,
+      pagination: {
+        total,
+        page,
+        pages,
+      },
+    },
   })
 })
 
@@ -99,7 +136,7 @@ const createService = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
-  getAllServices,
+  getServices,
   getServiceById,
   createService,
 }
