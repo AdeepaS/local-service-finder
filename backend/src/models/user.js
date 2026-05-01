@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema(
 );
 
 // Index email for faster lookups
-userSchema.index({ email: 1 });
+
 
 // Index for finding providers
 userSchema.index({ role: 1, isApproved: 1 });
