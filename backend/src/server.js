@@ -4,11 +4,6 @@ const connectDb = require('./config/db')
 
 const PORT = process.env.PORT
 
-if (!PORT) {
-  console.error('PORT is not set in environment variables')
-  process.exit(1)
-}
-
 const startServer = async () => {
   try {
     await connectDb()
