@@ -1,6 +1,14 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 function Navbar() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
   return (
     <header className="navbar">
       <div className="container navbar-inner">
@@ -10,12 +18,20 @@ function Navbar() {
 
         <nav className="nav-links">
           <NavLink to="/">Home</NavLink>
-          <NavLink to="/login">Login</NavLink>
-          <NavLink to="/register">Register</NavLink>
+          {user ? (
+            <>
+              <NavLink to="/dashboard">Dashboard</NavLink>
+              <button onClick={handleLogout} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#4b5563', fontWeight: 500 }}>Logout</button>
+            </>
+          ) : (
+            <>
+              <NavLink to="/login">Login</NavLink>
+              <NavLink to="/register">Register</NavLink>
+            </>
+          )}
         </nav>
 
-        {/* Role placeholder for future auth and role-based navigation */}
-        <span className="role-placeholder">Role: Guest</span>
+        <span className="role-placeholder">Role: {user ? user.role : 'Guest'}</span>
       </div>
     </header>
   )
