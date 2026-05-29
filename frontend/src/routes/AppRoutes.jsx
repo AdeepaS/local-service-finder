@@ -8,6 +8,8 @@ import Register from '../pages/Register'
 import SearchResults from '../pages/SearchResults'
 import ServiceDetails from '../pages/ServiceDetails'
 import Dashboard from '../pages/Dashboard'
+import CreateService from '../pages/CreateService'
+import EditService from '../pages/EditService'
 
 function AppRoutes() {
   return (
@@ -22,6 +24,8 @@ function AppRoutes() {
           <Route path="/services/:id" element={<ServiceDetails />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/services/create" element={<CreateService />} />
+            <Route path="/services/edit/:id" element={<EditService />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

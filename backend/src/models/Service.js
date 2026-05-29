@@ -2,13 +2,9 @@ const mongoose = require('mongoose');
 
 /**
  * Service Schema
- * 
+ *
  * Represents individual services offered by providers.
- * 
- * Uses referencing (not embedding) for providerId because:
- * 1. One provider can have many services (unbounded array)
- * 2. Services are often queried independently of the provider
- * 3. Prevents document size issues with many services
+ * Uses referencing for providerId (1 provider : many services).
  */
 const serviceSchema = new mongoose.Schema(
   {
@@ -16,7 +12,7 @@ const serviceSchema = new mongoose.Schema(
     providerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      //required: [true, 'Provider ID is required'],
+      required: [true, 'Provider ID is required'],
     },
 
     // Service information
@@ -59,14 +55,40 @@ const serviceSchema = new mongoose.Schema(
       trim: true,
     },
 
-    // Service status
+    // Cloudinary Image URLs
+    images: {
+      type: [String],
+      default: [],
+    },
+
+    // Admin moderation status
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
+    },
+
+    // Rating summary (updated when reviews are submitted)
+    ratingAverage: {
+      type: Number,
+      default: 0,
+      min: [0, 'Rating must be 0 or above'],
+      max: [5, 'Rating must be 5 or below'],
+    },
+
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
+
+    // Provider can toggle visibility without deleting
     isActive: {
       type: Boolean,
       default: true,
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
@@ -76,7 +98,10 @@ serviceSchema.index({ providerId: 1 });
 // Index for filtering by category
 serviceSchema.index({ category: 1 });
 
-// Compound index for common queries (find active services by provider in a category)
-serviceSchema.index({ providerId: 1, category: 1, isActive: 1 });
+// Compound index for approved, active services by category
+serviceSchema.index({ category: 1, status: 1, isActive: 1 });
+
+// Text index for keyword search
+serviceSchema.index({ title: 'text', description: 'text' });
 
 module.exports = mongoose.model('Service', serviceSchema);

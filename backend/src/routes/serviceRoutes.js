@@ -1,14 +1,35 @@
-const express = require('express')
+const express = require('express');
 const {
   getServices,
   getServiceById,
   createService,
-} = require('../controllers/serviceController')
+  updateService,
+  deleteService,
+  getMyServices,
+  approveService,
+  rejectService,
+  getAllAdminServices
+} = require('../controllers/serviceController');
 
-const router = express.Router()
+const { protect } = require('../middleware/authMiddleware');
+const { authorizeRoles } = require('../middleware/roleMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
-router.get('/:id', getServiceById)
-router.get('/', getServices)
-router.post('/', createService)
+const router = express.Router();
 
-module.exports = router
+// Public routes
+router.get('/', getServices);
+router.get('/:id', getServiceById);
+
+// Provider routes
+router.get('/provider/my-services', protect, authorizeRoles('provider'), getMyServices);
+router.post('/', protect, authorizeRoles('provider'), upload.array('images', 5), createService);
+router.put('/:id', protect, authorizeRoles('provider'), upload.array('images', 5), updateService);
+router.delete('/:id', protect, authorizeRoles('provider'), deleteService);
+
+// Admin routes
+router.get('/admin/all', protect, authorizeRoles('admin'), getAllAdminServices);
+router.patch('/:id/approve', protect, authorizeRoles('admin'), approveService);
+router.patch('/:id/reject', protect, authorizeRoles('admin'), rejectService);
+
+module.exports = router;

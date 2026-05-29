@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const asyncHandler = require('../middleware/asyncHandler')
 const Review = require('../models/review')
 const User = require('../models/user')
-const Service = require('../models/service')
+const Service = require('../models/Service')
 
 const createReview = asyncHandler(async (req, res) => {
   const { userId, serviceId, rating, comment } = req.body
