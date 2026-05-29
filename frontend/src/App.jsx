@@ -1,7 +1,12 @@
-import AppRoutes from './routes/AppRoutes'
+import { AnimatePresence } from 'framer-motion';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
-  return <AppRoutes />
+  return (
+    <AnimatePresence mode="wait">
+      <AppRoutes />
+    </AnimatePresence>
+  );
 }
 
-export default App
+export default App;

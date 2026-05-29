@@ -3,7 +3,46 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
   body {
     @apply bg-gray-50 text-gray-900;
+  }
+
+  /* Smooth scrolling */
+  * {
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent CLS with images */
+  img {
+    display: block;
+  }
+}
+
+@layer components {
+  /* Smooth transitions for interactive elements */
+  .smooth-transition {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* Optimize scrollbar appearance */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded-full hover:bg-gray-500;
+  }
+
+  /* Reduce CLS with focus visible */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
   }
 }
