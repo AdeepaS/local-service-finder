@@ -11,7 +11,9 @@ const app = express()
 
 app.use(helmet())
 app.use(cors({
-  origin: 'http://localhost:5173', // Update this based on frontend URL
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL 
+    : /^http:\/\/localhost:\d+$/, // Allow all localhost ports in development
   credentials: true, // Allow cookies to be sent
 }))
 app.use(express.json())
