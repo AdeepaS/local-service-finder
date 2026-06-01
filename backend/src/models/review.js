@@ -26,6 +26,13 @@ const reviewSchema = new mongoose.Schema(
       required: [true, 'Service ID is required'],
     },
 
+    // Reference to the booking (optional - for reviews linked to bookings)
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking',
+      default: null,
+    },
+
     // Star rating (1-5)
     rating: {
       type: Number,
