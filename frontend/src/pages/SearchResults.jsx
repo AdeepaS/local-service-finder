@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fetchServices } from '../services/api';
-import ServiceCard from '../components/ui/ServiceCard';
+import ServiceCard from '../components/features/services/ServiceCard';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 import EmptyState from '../components/ui/EmptyState';
 import FilterBar from '../components/filter/FilterBar';

@@ -12,7 +12,12 @@ const createReview = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   // Validate input
-  const validation = validateCreateReview({ serviceId, rating, comment });
+  const validation = validateCreateReview({
+    userId: userId.toString(),
+    serviceId,
+    rating,
+    comment,
+  });
   if (!validation.isValid) {
     const error = new Error('Validation failed');
     error.statusCode = 400;

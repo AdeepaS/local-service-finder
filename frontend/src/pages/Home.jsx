@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fetchServices } from '../services/api';
-import ServiceCard from '../components/ui/ServiceCard';
+import ServiceCard from '../components/features/services/ServiceCard';
 import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 import PageTransition from '../components/common/PageTransition';
 import { containerVariants, slideUpVariants } from '../utils/animations';

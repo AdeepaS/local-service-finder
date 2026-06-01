@@ -5,10 +5,6 @@
 const validateCreateReview = (data) => {
   const errors = {};
 
-  if (!data.userId || typeof data.userId !== 'string') {
-    errors.userId = 'User ID is required';
-  }
-
   if (!data.serviceId || typeof data.serviceId !== 'string') {
     errors.serviceId = 'Service ID is required';
   }

@@ -1,5 +1,6 @@
 const userService = require('../services/userService');
-const { validateUpdateProfile, validateChangePassword } = require('../validators/userValidator');
+const { validateUpdateProfile } = require('../validators/userValidator');
+const { validateChangePassword } = require('../validators/authValidator');
 const asyncHandler = require('../middleware/asyncHandler');
 
 /**

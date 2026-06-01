@@ -10,6 +10,7 @@ import ServiceDetails from '../pages/ServiceDetails'
 import Dashboard from '../pages/Dashboard'
 import CreateService from '../pages/CreateService'
 import EditService from '../pages/EditService'
+import Profile from '../pages/Profile'
 
 function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ function AppRoutes() {
           <Route path="/services/:id" element={<ServiceDetails />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/services/create" element={<CreateService />} />
             <Route path="/services/edit/:id" element={<EditService />} />
           </Route>

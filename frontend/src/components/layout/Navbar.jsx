@@ -31,6 +31,12 @@ function Navbar() {
               >
                 Dashboard
               </NavLink>
+              <NavLink 
+                to="/profile" 
+                className={({ isActive }) => isActive ? 'text-primary font-semibold' : 'text-gray-700 hover:text-primary transition-colors'}
+              >
+                Profile
+              </NavLink>
               <button 
                 onClick={handleLogout} 
                 className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"

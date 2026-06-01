@@ -1,31 +1,61 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchServiceById } from '../services/api';
+import { getReviewsByService } from '../services/reviewApi';
+import { useAuth } from '../context/AuthContext';
+import FavoriteButton from '../components/features/favorites/FavoriteButton';
+import ReviewForm from '../components/features/reviews/ReviewForm';
+import BookingForm from '../components/features/bookings/BookingForm';
 
 function ServiceDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [service, setService] = useState(null);
   const [provider, setProvider] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showBookingForm, setShowBookingForm] = useState(false);
+
+  const loadReviews = async () => {
+    try {
+      const res = await getReviewsByService(id);
+      setReviews(res.data.reviews || []);
+    } catch {
+      // Fall back to reviews from service payload if separate fetch fails
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      const data = await fetchServiceById(id);
+      setService(data.data.service);
+      setProvider(data.data.provider);
+      setReviews(data.data.reviews || []);
+      await loadReviews();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load service details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchServiceById(id);
-        setService(data.data.service);
-        setProvider(data.data.provider);
-        setReviews(data.data.reviews);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load service details');
-      } finally {
-        setLoading(false);
-      }
-    };
     loadData();
   }, [id]);
+
+  const handleBookClick = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (user.role !== 'customer') {
+      alert('Only customers can book services.');
+      return;
+    }
+    setShowBookingForm(true);
+  };
 
   if (loading) {
     return (
@@ -50,13 +80,12 @@ function ServiceDetails() {
     );
   }
 
-  const imageUrl = service.images?.length > 0 
-    ? service.images[0] 
+  const imageUrl = service.images?.length > 0
+    ? service.images[0]
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(service.category)}&background=random&size=800`;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      {/* Breadcrumbs */}
       <nav className="text-sm text-gray-500 mb-6 flex gap-2">
         <Link to="/" className="hover:text-primary">Home</Link>
         <span>/</span>
@@ -68,16 +97,13 @@ function ServiceDetails() {
       </nav>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        
-        {/* Main Content */}
         <div className="lg:w-2/3">
-          {/* Image Gallery (Placeholder for 1 image for now) */}
           <div className="rounded-2xl overflow-hidden mb-8 h-[400px] border border-gray-100 shadow-sm">
             <img src={imageUrl} alt={service.title} className="w-full h-full object-cover" />
           </div>
 
           <h1 className="text-3xl font-extrabold text-gray-900 mb-4">{service.title}</h1>
-          
+
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-8 pb-8 border-b border-gray-100">
             <span className="flex items-center gap-1 bg-blue-50 text-primary px-3 py-1 rounded-full font-medium">
               {service.category}
@@ -99,12 +125,16 @@ function ServiceDetails() {
             </div>
           </div>
 
+          <div className="mb-10">
+            <ReviewForm serviceId={service._id} onSuccess={loadReviews} />
+          </div>
+
           <div>
             <h2 className="text-xl font-bold text-gray-900 mb-6">Reviews</h2>
             {reviews.length > 0 ? (
               <div className="space-y-6">
-                {reviews.map((r, idx) => (
-                  <div key={idx} className="bg-gray-50 p-5 rounded-xl">
+                {reviews.map((r) => (
+                  <div key={r._id || `${r.user?.name}-${r.createdAt}`} className="bg-gray-50 p-5 rounded-xl">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-bold text-gray-900">{r.user?.name || 'Anonymous'}</span>
                       <div className="flex items-center text-yellow-400">
@@ -124,26 +154,28 @@ function ServiceDetails() {
           </div>
         </div>
 
-        {/* Sidebar Sticky Panel */}
         <div className="lg:w-1/3">
           <div className="bg-white border border-gray-100 shadow-lg rounded-2xl p-6 sticky top-6">
             <div className="mb-6 pb-6 border-b border-gray-100">
               <p className="text-sm text-gray-500 mb-1">Pricing</p>
               <h3 className="text-2xl font-bold text-gray-900">{service.priceRange || 'Contact for price'}</h3>
             </div>
-            
-            <button className="w-full bg-primary hover:bg-secondary text-white font-bold py-3.5 rounded-xl transition-colors mb-4 shadow-md">
+
+            <button
+              type="button"
+              onClick={handleBookClick}
+              className="w-full bg-primary hover:bg-secondary text-white font-bold py-3.5 rounded-xl transition-colors mb-3 shadow-md"
+            >
               Book Service
             </button>
-            <button className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3.5 rounded-xl transition-colors">
-              Message Provider
-            </button>
+
+            <FavoriteButton serviceId={service._id} className="w-full justify-center mb-4" />
 
             {provider && (
-              <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-4">
+              <div className="mt-4 pt-6 border-t border-gray-100 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden shrink-0">
-                  <img 
-                    src={provider.profile?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(provider.name)}&background=random`} 
+                  <img
+                    src={provider.profile?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(provider.name)}&background=random`}
                     alt={provider.name}
                     className="w-full h-full object-cover"
                   />
@@ -156,8 +188,15 @@ function ServiceDetails() {
             )}
           </div>
         </div>
-
       </div>
+
+      {showBookingForm && (
+        <BookingForm
+          service={service}
+          onClose={() => setShowBookingForm(false)}
+          onSuccess={loadData}
+        />
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchMyServices, deleteService } from '../../services/api';
 import { Link } from 'react-router-dom';
 import ConfirmModal from '../ui/ConfirmModal';
+import ProviderBookings from '../features/bookings/ProviderBookings';
 
 const ProviderDashboard = () => {
   const [services, setServices] = useState([]);
@@ -105,6 +106,8 @@ const ProviderDashboard = () => {
           </div>
         )}
       </div>
+
+      <ProviderBookings />
 
       <ConfirmModal 
         isOpen={deleteModalOpen}

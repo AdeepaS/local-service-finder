@@ -1,5 +1,6 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import axiosInstance from '../services/axiosInstance';
+import { getProfile } from '../services/userApi';
 import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
@@ -12,35 +13,48 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Load user on mount
+  const refreshProfile = useCallback(async () => {
+    const res = await getProfile();
+    setUser(res.data);
+    return res.data;
+  }, []);
+
+  const applyToken = (token) => {
+    if (token) {
+      axiosInstance.defaults.headers.common.Authorization = `Bearer ${token}`;
+    } else {
+      delete axiosInstance.defaults.headers.common.Authorization;
+    }
+    setAccessToken(token);
+  };
+
+  const loadSession = useCallback(async () => {
+    try {
+      const res = await axiosInstance.post('/auth/refresh');
+      applyToken(res.data.accessToken);
+
+      const profile = await getProfile();
+      setUser(profile.data);
+    } catch {
+      setUser(null);
+      applyToken(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const res = await axiosInstance.post('/auth/refresh');
-        setAccessToken(res.data.accessToken);
-
-        const meRes = await axiosInstance.get('/auth/me', {
-          headers: { Authorization: `Bearer ${res.data.accessToken}` }
-        });
-        setUser(meRes.data.data);
-      } catch (error) {
-        console.log('No valid session found');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUser();
+    loadSession();
 
     const handleLogout = () => {
       setUser(null);
-      setAccessToken(null);
+      applyToken(null);
       navigate('/login');
     };
 
     window.addEventListener('auth:logout', handleLogout);
     return () => window.removeEventListener('auth:logout', handleLogout);
-  }, [navigate]);
+  }, [loadSession, navigate]);
 
   useEffect(() => {
     const requestInterceptor = axiosInstance.interceptors.request.use(
@@ -60,15 +74,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await axiosInstance.post('/auth/login', { email, password });
-    setAccessToken(res.data.accessToken);
-    setUser(res.data.data);
+    applyToken(res.data.accessToken);
+    const profile = await getProfile();
+    setUser(profile.data);
     navigate('/dashboard');
   };
 
   const register = async (name, email, password, role) => {
     const res = await axiosInstance.post('/auth/register', { name, email, password, role });
-    setAccessToken(res.data.accessToken);
-    setUser(res.data.data);
+    applyToken(res.data.accessToken);
+    const profile = await getProfile();
+    setUser(profile.data);
     navigate('/dashboard');
   };
 
@@ -79,12 +95,22 @@ export const AuthProvider = ({ children }) => {
       console.error(err);
     }
     setUser(null);
-    setAccessToken(null);
+    applyToken(null);
     navigate('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        loading,
+        login,
+        register,
+        logout,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
