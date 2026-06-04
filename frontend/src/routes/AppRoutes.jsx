@@ -11,6 +11,9 @@ import Dashboard from '../pages/Dashboard'
 import CreateService from '../pages/CreateService'
 import EditService from '../pages/EditService'
 import Profile from '../pages/Profile'
+import MyBookings from '../pages/MyBookings'
+import Favorites from '../pages/Favorites'
+import CustomerDashboardLayout from '../components/layout/CustomerDashboardLayout'
 
 function AppRoutes() {
   return (
@@ -21,13 +24,19 @@ function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/services" element={<SearchResults />} />
-          <Route path="/services/:id" element={<ServiceDetails />} />
+          <Route element={<CustomerDashboardLayout />}>
+            <Route path="/services" element={<SearchResults />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
+          </Route>
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/services/create" element={<CreateService />} />
-            <Route path="/services/edit/:id" element={<EditService />} />
+            <Route element={<CustomerDashboardLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/bookings" element={<MyBookings />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/services/create" element={<CreateService />} />
+              <Route path="/services/edit/:id" element={<EditService />} />
+            </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
