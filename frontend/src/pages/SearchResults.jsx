@@ -172,48 +172,55 @@ function SearchResults() {
       />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-10">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
 
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
+          className="mb-5 md:mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2"
         >
-          {loading ? (
-            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-          ) : (
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {pagination.total > 0
-                ? `${pagination.total} Service${pagination.total === 1 ? '' : 's'} Found`
-                : 'No Services Found'}
-            </h1>
-          )}
-
-          {/* Active filter summary text */}
-          <AnimatePresence>
-            {activeFilters.length > 0 && !loading && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mt-1 text-sm text-gray-500"
-              >
-                Filters applied:{' '}
-                <span className="font-medium text-primary">
-                  {activeFilters
-                    .map(([k, v]) => {
-                      if (k === 'verifiedOnly') return 'Verified Only';
-                      if (k === 'minRating') return `${v}★+`;
-                      if (k === 'minPrice') return `From $${v}`;
-                      if (k === 'maxPrice') return `Up to $${v}`;
-                      return v;
-                    })
-                    .join(' • ')}
-                </span>
-              </motion.p>
+          <div>
+            {loading ? (
+              <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse" />
+            ) : (
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+                {pagination.total > 0
+                  ? `${pagination.total} Service${pagination.total === 1 ? '' : 's'} Found`
+                  : 'No Services Found'}
+              </h1>
             )}
-          </AnimatePresence>
+
+            <AnimatePresence>
+              {activeFilters.length > 0 && !loading && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-1 text-sm text-gray-500"
+                >
+                  Showing results for{' '}
+                  <span className="font-medium text-gray-700">
+                    {activeFilters
+                      .map(([k, v]) => {
+                        if (k === 'verifiedOnly') return 'Verified Only';
+                        if (k === 'minRating') return `${v}★+`;
+                        if (k === 'minPrice') return `From $${v}`;
+                        if (k === 'maxPrice') return `Up to $${v}`;
+                        return v;
+                      })
+                      .join(' · ')}
+                  </span>
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {!loading && pagination.total > 0 && (
+            <p className="text-xs text-gray-400 font-medium shrink-0">
+              Page {pagination.page} of {pagination.pages}
+            </p>
+          )}
         </motion.div>
 
         {/* Services Grid */}
@@ -222,7 +229,7 @@ function SearchResults() {
         ) : services.length > 0 ? (
           <>
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-12"
+              className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-5 mb-10"
               variants={containerVariants}
               initial="hidden"
               animate="visible"

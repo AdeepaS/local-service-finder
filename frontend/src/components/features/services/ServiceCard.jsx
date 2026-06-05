@@ -1,167 +1,129 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
-import { MapPin, ShieldCheck } from 'lucide-react';
+import { MapPin, ShieldCheck, Star, ArrowRight } from 'lucide-react';
 import LazyImage from '../../common/LazyImage';
-import { cardHoverVariants, itemVariants } from '../../../utils/animations';
+import { itemVariants } from '../../../utils/animations';
 
-const StarIcon = ({ filled }) => (
-  <svg
-    className={`w-3.5 h-3.5 ${filled ? 'text-yellow-400' : 'text-gray-200'}`}
-    fill="currentColor"
-    viewBox="0 0 20 20"
-  >
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-  </svg>
-);
+const CATEGORY_COLORS = {
+  'Plumbing':         'bg-blue-500/90 text-white',
+  'Electrical':       'bg-amber-500/90 text-white',
+  'AC Repair':        'bg-cyan-500/90 text-white',
+  'Appliance Repair': 'bg-purple-500/90 text-white',
+  'Carpentry':        'bg-orange-500/90 text-white',
+  'Cleaning':         'bg-emerald-500/90 text-white',
+  'Painting':         'bg-rose-500/90 text-white',
+};
 
-const RatingStars = ({ rating }) => (
-  <div className="flex items-center gap-0.5">
-    {[1, 2, 3, 4, 5].map((i) => (
-      <StarIcon key={i} filled={i <= Math.round(rating)} />
-    ))}
-  </div>
-);
-
-/**
- * ServiceCard Component
- * Enhanced card displaying service image, name, provider, category,
- * location, starting price, rating, and verified badge.
- */
 const ServiceCard = memo(({ service }) => {
   const {
-    _id,
-    title,
-    providerId,
-    category,
-    location,
-    priceRange,
-    ratingAverage,
-    totalReviews,
-    images,
+    _id, title, providerId, category,
+    location, priceRange, ratingAverage, totalReviews, images,
   } = service;
 
   const imageUrl =
     images?.length > 0
       ? images[0]
-      : `https://ui-avatars.com/api/?name=${encodeURIComponent(category)}&background=random&size=400`;
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(category || 'S')}&background=6366f1&color=fff&size=400`;
 
-  const providerName =
-    typeof providerId === 'object' ? providerId?.name : 'Provider';
+  const providerName = typeof providerId === 'object' ? (providerId?.name ?? 'Provider') : 'Provider';
+  const isVerified   = typeof providerId === 'object' ? !!providerId?.isApproved : false;
+  const rating       = ratingAverage > 0 ? ratingAverage : null;
 
-  const isVerified =
-    typeof providerId === 'object' ? providerId?.isApproved === true : false;
-
-  const rating = ratingAverage > 0 ? ratingAverage : null;
-
-  // Format numeric price
   const formattedPrice =
     priceRange !== null && priceRange !== undefined
       ? `$${Number(priceRange).toLocaleString()}`
-      : 'Quote';
+      : 'Get Quote';
+
+  const categoryStyle = CATEGORY_COLORS[category] ?? 'bg-gray-700/90 text-white';
 
   return (
-    <motion.div variants={itemVariants} initial="hidden" animate="visible">
-      <motion.div
-        className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full cursor-pointer"
-        variants={cardHoverVariants}
-        initial="idle"
-        whileHover="hover"
-      >
-        {/* ── Image ─────────────────────────────────────────────────────── */}
-        <div className="relative h-48 w-full overflow-hidden bg-gray-100 shrink-0">
-          <LazyImage
-            src={imageUrl}
-            alt={title}
-            className="w-full h-full transition-transform duration-500 group-hover:scale-105"
-            objectFit="cover"
-          />
+    <motion.article
+      variants={itemVariants}
+      initial="hidden"
+      animate="visible"
+      className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 overflow-hidden flex flex-col h-full"
+    >
+      <Link
+        to={`/services/${_id}`}
+        className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        aria-label={`View ${title}`}
+      />
 
-          {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* ── Image ────────────────────────────────────────────────────── */}
+      <div className="relative h-40 sm:h-44 w-full overflow-hidden bg-gray-100 shrink-0">
+        <LazyImage
+          src={imageUrl}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          objectFit="cover"
+        />
 
-          {/* Category badge */}
-          <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full text-xs font-semibold text-gray-700 shadow-md">
+        <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+
+        {/* Category badge */}
+        {category && (
+          <span className={`absolute top-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm shadow-sm ${categoryStyle}`}>
             {category}
-          </div>
+          </span>
+        )}
 
-          {/* Rating badge */}
-          {rating && (
-            <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1 shadow-md">
-              <svg className="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              <span className="text-xs font-bold text-gray-700">{rating.toFixed(1)}</span>
-            </div>
-          )}
-
-          {/* Verified badge */}
-          {isVerified && (
-            <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-emerald-500 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-md">
-              <ShieldCheck className="w-3 h-3" />
-              Verified
-            </div>
-          )}
-        </div>
-
-        {/* ── Body ──────────────────────────────────────────────────────── */}
-        <div className="p-4 flex flex-col flex-grow">
-          {/* Title */}
-          <h3 className="text-base font-bold text-gray-900 line-clamp-2 mb-1.5 group-hover:text-primary transition-colors duration-200 leading-snug">
-            {title}
-          </h3>
-
-          {/* Provider */}
-          <p className="text-sm text-gray-500 font-medium mb-1 line-clamp-1">
-            {providerName}
-            {isVerified && (
-              <span className="ml-1.5 inline-flex items-center gap-0.5 text-emerald-600 text-xs font-semibold">
-                <ShieldCheck className="w-3 h-3" />
-              </span>
+        {/* Rating pill */}
+        {rating ? (
+          <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+            <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+            {rating.toFixed(1)}
+            {totalReviews > 0 && (
+              <span className="text-gray-400 font-medium">({totalReviews})</span>
             )}
-          </p>
+          </span>
+        ) : (
+          <span className="absolute top-2.5 left-2.5 text-[10px] font-medium text-white/90 bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full">
+            New
+          </span>
+        )}
 
-          {/* Location */}
-          <div className="flex items-center gap-1 text-xs text-gray-400 mb-3">
+        {isVerified && (
+          <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+            <ShieldCheck className="w-2.5 h-2.5" />
+            Verified
+          </span>
+        )}
+      </div>
+
+      {/* ── Body ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-col flex-grow p-4">
+
+        <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-200">
+          {title}
+        </h3>
+
+        <p className="mt-1 text-xs text-gray-500 line-clamp-1">
+          {providerName}
+        </p>
+
+        {location && (
+          <div className="mt-2 flex items-center gap-1 text-xs text-gray-400">
             <MapPin className="w-3 h-3 shrink-0" />
-            <span className="line-clamp-1">{location || 'Location not specified'}</span>
+            <span className="line-clamp-1">{location}</span>
           </div>
+        )}
 
-          {/* Star rating row */}
-          {rating ? (
-            <div className="flex items-center gap-1.5 mb-3">
-              <RatingStars rating={rating} />
-              <span className="text-xs font-semibold text-gray-700">{rating.toFixed(1)}</span>
-              {totalReviews > 0 && (
-                <span className="text-xs text-gray-400">({totalReviews})</span>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 mb-3">
-              <RatingStars rating={0} />
-              <span className="text-xs text-gray-400">No reviews yet</span>
-            </div>
-          )}
+        <div className="flex-grow min-h-[0.5rem]" />
 
-          {/* Spacer */}
-          <div className="flex-grow" />
-
-          {/* Footer */}
-          <div className="pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-            <div>
-              <p className="text-xs text-gray-400 font-medium">Starting from</p>
-              <p className="text-lg font-bold text-gray-900 leading-tight">{formattedPrice}</p>
-            </div>
-            <Link
-              to={`/services/${_id}`}
-              className="inline-block text-white font-semibold text-sm px-4 py-2 rounded-xl bg-primary hover:bg-secondary transition-all duration-200 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5"
-            >
-              View Details
-            </Link>
+        {/* Footer */}
+        <div className="flex items-end justify-between gap-3 pt-3 mt-2 border-t border-gray-100">
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Starting at</p>
+            <p className="text-lg font-extrabold text-gray-900 leading-tight">{formattedPrice}</p>
           </div>
+          <span className="relative z-20 flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all duration-200">
+            Details
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </motion.article>
   );
 });
 
