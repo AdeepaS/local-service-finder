@@ -22,14 +22,14 @@ function CustomerDashboard() {
       title: 'My bookings',
       description: 'View and manage requests',
       icon: <Calendar className="w-6 h-6 text-primary" />,
-      link: '/profile?tab=bookings',
+      link: '/bookings',
       color: 'bg-blue-50'
     },
     {
       title: 'Saved services',
       description: 'Your favorite listings',
       icon: <Heart className="w-6 h-6 text-rose-500" />,
-      link: '/profile?tab=favorites',
+      link: '/favorites',
       color: 'bg-rose-50'
     },
     {
@@ -44,7 +44,7 @@ function CustomerDashboard() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
       <motion.div initial="hidden" animate="show" variants={containerVariants}>
-        
+
         {/* Header */}
         <motion.div variants={itemVariants} className="mb-10">
           <h1 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Welcome back</h1>
@@ -55,7 +55,7 @@ function CustomerDashboard() {
         <motion.div variants={itemVariants} className="grid sm:grid-cols-3 gap-6 mb-12">
           {cards.map((card, idx) => (
             <Link key={idx} to={card.link}>
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -4, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all cursor-pointer h-full group"
@@ -81,7 +81,7 @@ function CustomerDashboard() {
               <Activity className="w-5 h-5 text-gray-400" />
               <h2 className="text-lg font-bold text-gray-900">Recent bookings</h2>
             </div>
-            <Link to="/profile?tab=bookings" className="text-sm font-semibold text-primary hover:text-secondary flex items-center transition-colors">
+            <Link to="/bookings" className="text-sm font-semibold text-primary hover:text-secondary flex items-center transition-colors">
               View all <ChevronRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
