@@ -20,7 +20,13 @@ const serviceService = {
    * @returns {Object} { services, pagination }
    */
   async getPublicServices(filters = {}) {
-    const { search, category, location, page = 1, limit = 10 } = filters;
+    const {
+      search, category, location,
+      minPrice, maxPrice,
+      minRating, verifiedOnly,
+      sortBy = 'recent',
+      page = 1, limit = 10,
+    } = filters;
 
     const pageNum = Math.max(Number.parseInt(page, 10) || 1, 1);
     const limitNum = Math.max(Number.parseInt(limit, 10) || 10, 1);
@@ -41,13 +47,42 @@ const serviceService = {
       query.location = { $regex: escapeRegExp(location), $options: 'i' };
     }
 
+    // Numeric price filtering on the priceRange field
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query.priceRange = {};
+      if (minPrice !== undefined) query.priceRange.$gte = minPrice;
+      if (maxPrice !== undefined) query.priceRange.$lte = maxPrice;
+    }
+
+    // Rating filter
+    if (minRating !== undefined && minRating > 0) {
+      query.ratingAverage = { $gte: minRating };
+    }
+
+    // Verified providers filter — join via User collection
+    if (verifiedOnly) {
+      const User = require('../models/user');
+      const approvedProviders = await User.find(
+        { role: 'provider', isApproved: true },
+        { _id: 1 }
+      ).lean();
+      const approvedIds = approvedProviders.map((u) => u._id);
+      query.providerId = { $in: approvedIds };
+    }
+
+    // Sorting
+    let sort = { createdAt: -1 };
+    if (sortBy === 'rating') sort = { ratingAverage: -1 };
+    else if (sortBy === 'price-low') sort = { priceRange: 1 };
+    else if (sortBy === 'price-high') sort = { priceRange: -1 };
+
     const [total, services] = await Promise.all([
       Service.countDocuments(query),
       Service.find(query)
-        .sort({ createdAt: -1 })
+        .sort(sort)
         .skip(skip)
         .limit(limitNum)
-        .populate('providerId', 'name profile.profileImage'),
+        .populate('providerId', 'name profile.profileImage isApproved'),
     ]);
 
     const pages = total === 0 ? 0 : Math.ceil(total / limitNum);
@@ -60,6 +95,18 @@ const serviceService = {
         pages,
       },
     };
+  },
+
+  /**
+   * Get distinct service categories from approved services
+   * @returns {string[]} Sorted list of categories
+   */
+  async getCategories() {
+    const categories = await Service.distinct('category', {
+      isActive: true,
+      status: 'approved',
+    });
+    return categories.sort();
   },
 
   /**

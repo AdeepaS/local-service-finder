@@ -8,12 +8,23 @@ const asyncHandler = require('../middleware/asyncHandler');
  * @access  Public
  */
 const getServices = asyncHandler(async (req, res) => {
-  const { search, category, location, page = 1, limit = 10 } = req.query;
+  const {
+    search, category, location,
+    minPrice, maxPrice,
+    minRating, verifiedOnly,
+    sortBy,
+    page = 1, limit = 10,
+  } = req.query;
 
   const result = await serviceService.getPublicServices({
     search,
     category,
     location,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    minRating: minRating ? Number(minRating) : undefined,
+    verifiedOnly: verifiedOnly === 'true',
+    sortBy,
     page: Math.max(parseInt(page, 10) || 1, 1),
     limit: Math.max(parseInt(limit, 10) || 10, 1),
   });
@@ -22,6 +33,16 @@ const getServices = asyncHandler(async (req, res) => {
     success: true,
     data: result,
   });
+});
+
+/**
+ * @desc    Get all distinct service categories
+ * @route   GET /api/services/categories
+ * @access  Public
+ */
+const getCategories = asyncHandler(async (req, res) => {
+  const categories = await serviceService.getCategories();
+  res.status(200).json({ success: true, data: categories });
 });
 
 /**
@@ -201,6 +222,7 @@ const rejectService = asyncHandler(async (req, res) => {
 
 module.exports = {
   getServices,
+  getCategories,
   getServiceById,
   createService,
   updateService,

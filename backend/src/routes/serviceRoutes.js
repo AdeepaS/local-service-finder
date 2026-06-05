@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getServices,
+  getCategories,
   getServiceById,
   createService,
   updateService,
@@ -19,6 +20,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/', getServices);
+router.get('/categories', getCategories);
 router.get('/:id', getServiceById);
 
 // Provider routes

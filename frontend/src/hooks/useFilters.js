@@ -23,37 +23,31 @@ export const useDebounce = (value, delay = 500) => {
 
 /**
  * Custom hook for managing search and filter params
+ * Supports: search, location, category, minPrice, maxPrice, minRating, verifiedOnly, sortBy
  * @param {URLSearchParams} initialParams - Initial search params
  * @returns {Object} Filter state and methods
  */
 export const useFilters = (initialParams) => {
   const [filters, setFilters] = useState({
-    search: initialParams?.get('search') || '',
-    location: initialParams?.get('location') || '',
-    category: initialParams?.get('category') || '',
-    minPrice: initialParams?.get('minPrice') || '',
-    maxPrice: initialParams?.get('maxPrice') || '',
-    sortBy: initialParams?.get('sortBy') || 'recent',
+    search:       initialParams?.get('search')      || '',
+    location:     initialParams?.get('location')    || '',
+    category:     initialParams?.get('category')    || '',
+    minPrice:     initialParams?.get('minPrice')    || '',
+    maxPrice:     initialParams?.get('maxPrice')    || '',
+    minRating:    initialParams?.get('minRating')   || '',
+    verifiedOnly: initialParams?.get('verifiedOnly') === 'true',
+    sortBy:       initialParams?.get('sortBy')      || 'recent',
   });
 
-  const [activeFilters, setActiveFilters] = useState(
-    Object.entries(filters).filter(([_, v]) => v !== '' && v !== 'recent')
-  );
-
   const updateFilter = (key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const resetFilters = () => {
     setFilters({
-      search: '',
-      location: '',
-      category: '',
-      minPrice: '',
-      maxPrice: '',
+      search: '', location: '', category: '',
+      minPrice: '', maxPrice: '',
+      minRating: '', verifiedOnly: false,
       sortBy: 'recent',
     });
   };
@@ -61,24 +55,22 @@ export const useFilters = (initialParams) => {
   const removeFilter = (key) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: '',
+      [key]: key === 'verifiedOnly' ? false : '',
     }));
   };
 
-  return {
-    filters,
-    updateFilter,
-    resetFilters,
-    removeFilter,
-    activeFilters: Object.entries(filters).filter(([_, v]) => v !== '' && v !== 'recent'),
-  };
+  // Active filters for display (excludes defaults)
+  const activeFilters = Object.entries(filters).filter(([k, v]) => {
+    if (k === 'sortBy') return v && v !== 'recent';
+    if (k === 'verifiedOnly') return v === true;
+    return v !== '' && v !== null && v !== undefined;
+  });
+
+  return { filters, updateFilter, resetFilters, removeFilter, activeFilters };
 };
 
 /**
  * Custom hook for infinite scroll / pagination
- * @param {Function} fetchMore - Function to fetch more items
- * @param {number} threshold - Scroll threshold in pixels
- * @returns {Object} Infinite scroll state and ref
  */
 export const useInfiniteScroll = (fetchMore, threshold = 500) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,20 +95,14 @@ export const useInfiniteScroll = (fetchMore, threshold = 500) => {
     return () => observer.disconnect();
   }, [fetchMore, isLoading, hasMore, threshold]);
 
-  return {
-    observerTarget,
-    isLoading,
-    setHasMore,
-  };
+  return { observerTarget, isLoading, setHasMore };
 };
 
 /**
  * Custom hook for scroll position restoration
- * @returns {Object} Scroll methods
  */
 export const useScrollRestoration = () => {
   useEffect(() => {
-    // Scroll to top on mount
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
