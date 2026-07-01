@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import {
   getAddresses,
   createAddress,
@@ -74,16 +75,41 @@ function AddressManager() {
     setSaving(true);
     setError(null);
     try {
+      const isEdit = !!editingId;
       if (editingId) {
         await updateAddress(editingId, form);
       } else {
         await createAddress(form);
       }
+      const msg = isEdit ? 'Address updated' : 'Address added';
+      toast.success('✅ ' + msg + ' successfully!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       setShowForm(false);
       setForm(EMPTY_FORM);
       loadAddresses();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save address');
+      const errorMsg = err.response?.data?.message || 'Failed to save address';
+      setError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } finally {
       setSaving(false);
     }
@@ -93,18 +119,64 @@ function AddressManager() {
     if (!window.confirm('Delete this address?')) return;
     try {
       await deleteAddress(addressId);
+      toast.success('✅ Address deleted successfully!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       loadAddresses();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete address');
+      const errorMsg = err.response?.data?.message || 'Failed to delete address';
+      setError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     }
   };
 
   const handleSetDefault = async (addressId) => {
     try {
       await setDefaultAddress(addressId);
+      toast.success('✅ Default address updated!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       loadAddresses();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to set default');
+      const errorMsg = err.response?.data?.message || 'Failed to set default';
+      setError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 
 function Login() {
@@ -13,8 +14,31 @@ function Login() {
     setErrorMsg('')
     try {
       await login(email, password)
+      toast.success('✅ Login successful! Redirecting...', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      })
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Login failed')
+      const errorMsg = err.response?.data?.message || 'Login failed'
+      setErrorMsg(errorMsg)
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      })
     }
   }
 

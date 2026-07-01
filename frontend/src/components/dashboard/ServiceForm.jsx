@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { createService, updateService, fetchServiceById } from '../../services/api';
 
 const ServiceForm = ({ isEditing = false }) => {
@@ -77,14 +78,37 @@ const ServiceForm = ({ isEditing = false }) => {
         }
       }
 
-      if (isEditing) {
-        await updateService(id, uploadData);
-      } else {
-        await createService(uploadData);
-      }
+      const response = isEditing 
+        ? await updateService(id, uploadData)
+        : await createService(uploadData);
+      
+      const message = isEditing ? 'Service updated' : 'Service created';
+      toast.success('✅ ' + (response?.data?.message || message + ' successfully!'), {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong');
+      const errorMsg = err.response?.data?.message || 'Something went wrong';
+      setError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } finally {
       setSubmitting(false);
     }

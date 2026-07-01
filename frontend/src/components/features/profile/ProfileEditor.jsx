@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
 import { updateProfile, changePassword } from '../../../services/userApi';
 
@@ -64,9 +65,33 @@ function ProfileEditor() {
       };
       await updateProfile(payload);
       await refreshProfile();
-      setProfileMsg('Profile updated successfully.');
+      const msg = 'Profile updated successfully';
+      setProfileMsg(msg + '.');
+      toast.success('✅ ' + msg + '!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } catch (err) {
-      setProfileError(err.response?.data?.message || 'Failed to update profile');
+      const errorMsg = err.response?.data?.message || 'Failed to update profile';
+      setProfileError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } finally {
       setSavingProfile(false);
     }
@@ -75,7 +100,19 @@ function ProfileEditor() {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError('New passwords do not match');
+      const errorMsg = 'New passwords do not match';
+      setPasswordError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       return;
     }
     setSavingPassword(true);
@@ -87,10 +124,34 @@ function ProfileEditor() {
         passwordForm.newPassword,
         passwordForm.confirmPassword
       );
-      setPasswordMsg('Password changed successfully.');
+      const msg = 'Password changed successfully';
+      setPasswordMsg(msg + '.');
+      toast.success('✅ ' + msg + '!', {
+        duration: 3000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      setPasswordError(err.response?.data?.message || 'Failed to change password');
+      const errorMsg = err.response?.data?.message || 'Failed to change password';
+      setPasswordError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } finally {
       setSavingPassword(false);
     }

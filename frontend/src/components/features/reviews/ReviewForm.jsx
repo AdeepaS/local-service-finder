@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
 import { createReview } from '../../../services/reviewApi';
 
@@ -26,12 +27,35 @@ function ReviewForm({ serviceId, onSuccess }) {
     setSubmitting(true);
     setError(null);
     try {
-      await createReview({ serviceId, rating: Number(rating), comment: comment.trim() || undefined });
+      const response = await createReview({ serviceId, rating: Number(rating), comment: comment.trim() || undefined });
       setSuccess(true);
       setComment('');
+      toast.success('⭐ ' + (response?.data?.message || 'Review submitted successfully!'), {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
       onSuccess?.();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit review');
+      const errorMsg = err.response?.data?.message || 'Failed to submit review';
+      setError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } finally {
       setSubmitting(false);
     }

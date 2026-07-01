@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../../context/AuthContext';
 import { createBooking } from '../../../services/bookingApi';
 import { getAddresses } from '../../../services/addressApi';
@@ -66,7 +67,7 @@ function BookingForm({ service, onClose, onSuccess }) {
     const selected = addresses.find((a) => a._id === selectedAddressId);
 
     try {
-      await createBooking({
+      const response = await createBooking({
         serviceId: service._id,
         title: form.title.trim(),
         description: form.description.trim() || undefined,
@@ -78,11 +79,37 @@ function BookingForm({ service, onClose, onSuccess }) {
         notes: form.notes.trim() || undefined,
         estimatedPrice: form.estimatedPrice ? Number(form.estimatedPrice) : undefined,
       });
+      
+      // Show success toast notification
+      toast.success('✅ ' + (response?.data?.message || 'Booking created successfully!'), {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#10b981',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
+      
       onSuccess?.();
       onClose?.();
       navigate('/profile?tab=bookings');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create booking');
+      const errorMsg = err.response?.data?.message || 'Failed to create booking';
+      setError(errorMsg);
+      toast.error('❌ ' + errorMsg, {
+        duration: 4000,
+        position: 'top-center',
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontWeight: 'bold',
+          padding: '16px',
+          borderRadius: '8px',
+        },
+      });
     } finally {
       setSubmitting(false);
     }
