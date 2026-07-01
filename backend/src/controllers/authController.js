@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const emailService = require('../services/email/email.service');
 const { setRefreshTokenCookie } = require('../utils/generateTokens');
 const { validateRegister, validateLogin } = require('../validators/authValidator');
 const asyncHandler = require('../middleware/asyncHandler');
@@ -19,6 +20,11 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const result = await authService.registerUser({ name, email, password, role });
+
+  // Send welcome email
+  emailService.sendWelcomeEmail(result.user).catch(() => {
+    console.warn('Welcome email failed (non-critical)');
+  });
 
   // Set refresh token cookie
   setRefreshTokenCookie(res, result.refreshToken);

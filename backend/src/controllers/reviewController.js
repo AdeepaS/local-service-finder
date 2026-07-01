@@ -1,6 +1,11 @@
 const reviewService = require('../services/reviewService');
+const emailService = require('../services/email/email.service');
+const mongoose = require('mongoose');
 const { validateCreateReview, validateUpdateReview } = require('../validators/reviewValidator');
 const asyncHandler = require('../middleware/asyncHandler');
+const User = require('../models/user');
+const Service = require('../models/Service');
+const Review = require('../models/review');
 
 /**
  * @desc    Create a review for a service
@@ -32,9 +37,40 @@ const createReview = asyncHandler(async (req, res) => {
     comment,
   });
 
+  // Send review notification to provider (with null checks)
+  try {
+    const customer = await User.findById(review.customer);
+    const service = await Service.findById(review.service);
+    
+    if (customer && service && service.provider) {
+      const provider = await User.findById(service.provider);
+      if (provider) {
+        const allReviews = await Review.find({ service: serviceId });
+        const averageRating = allReviews.length > 0 
+          ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length).toFixed(1)
+          : 0;
+        const totalReviews = allReviews.length;
+
+        emailService.sendReviewNotification({
+          review: review.toObject(),
+          customer: customer.toObject(),
+          service: service.toObject(),
+          provider: provider.toObject(),
+          averageRating,
+          totalReviews,
+          reviewLink: `${process.env.FRONTEND_URL}/services/${serviceId}#reviews`
+        }).catch(() => {
+          console.warn('Review notification email failed');
+        });
+      }
+    }
+  } catch (emailError) {
+    console.warn('Error sending review notification email:', emailError.message);
+  }
+
   res.status(201).json({
     success: true,
-    message: 'Review created successfully',
+    message: '⭐ Thank you! Your review has been posted and the provider has been notified.',
     data: review,
   });
 });

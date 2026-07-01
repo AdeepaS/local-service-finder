@@ -1,6 +1,10 @@
 const bookingService = require('../services/bookingService');
+const emailService = require('../services/email/email.service');
+const mongoose = require('mongoose');
 const { validateCreateBooking, validateUpdateBookingStatus } = require('../validators/bookingValidator');
 const asyncHandler = require('../middleware/asyncHandler');
+const User = require('../models/user');
+const Service = require('../models/Service');
 
 /**
  * @desc    Create a new booking
@@ -39,9 +43,44 @@ const createBooking = asyncHandler(async (req, res) => {
     estimatedPrice,
   });
 
+  // Send booking confirmation emails (with null checks)
+  try {
+    const customer = await User.findById(booking.customer);
+    const service = await Service.findById(booking.service);
+    
+    if (customer && service && service.provider) {
+      const provider = await User.findById(service.provider);
+      if (provider) {
+        // Send to customer
+        emailService.sendBookingConfirmation({
+          booking: booking.toObject(),
+          customer: customer.toObject(),
+          provider: provider.toObject(),
+          recipientType: 'customer',
+          bookingLink: `${process.env.FRONTEND_URL}/bookings/${booking._id}`
+        }).catch(() => {
+          console.warn('Customer confirmation email failed');
+        });
+
+        // Send to provider
+        emailService.sendBookingConfirmation({
+          booking: booking.toObject(),
+          customer: customer.toObject(),
+          provider: provider.toObject(),
+          recipientType: 'provider',
+          bookingLink: `${process.env.FRONTEND_URL}/bookings/${booking._id}`
+        }).catch(() => {
+          console.warn('Provider confirmation email failed');
+        });
+      }
+    }
+  } catch (emailError) {
+    console.warn('Error sending booking confirmation emails:', emailError.message);
+  }
+
   res.status(201).json({
     success: true,
-    message: 'Booking created successfully',
+    message: 'Booking created successfully! The provider will review your request shortly.',
     data: booking,
   });
 });
@@ -116,9 +155,30 @@ const acceptBooking = asyncHandler(async (req, res) => {
 
   const booking = await bookingService.acceptBooking(bookingId, providerId, estimatedPrice);
 
+  // Send status update email (with null checks)
+  try {
+    const customer = await User.findById(booking.customer);
+    const service = await Service.findById(booking.service);
+    if (customer && service && service.provider) {
+      const provider = await User.findById(service.provider);
+      if (provider) {
+        emailService.sendBookingStatusUpdate({
+          booking: booking.toObject(),
+          customer: customer.toObject(),
+          provider: provider.toObject(),
+          bookingLink: `${process.env.FRONTEND_URL}/bookings/${booking._id}`
+        }).catch(() => {
+          console.warn('Status update email failed');
+        });
+      }
+    }
+  } catch (emailError) {
+    console.warn('Error sending status update email:', emailError.message);
+  }
+
   res.status(200).json({
     success: true,
-    message: 'Booking accepted successfully',
+    message: '✅ Booking accepted! The customer will receive a confirmation email shortly.',
     data: booking,
   });
 });
@@ -135,9 +195,31 @@ const rejectBooking = asyncHandler(async (req, res) => {
 
   const booking = await bookingService.rejectBooking(bookingId, providerId, reason);
 
+  // Send rejection email with reason (with null checks)
+  try {
+    const customer = await User.findById(booking.customer);
+    const service = await Service.findById(booking.service);
+    if (customer && service && service.provider) {
+      const provider = await User.findById(service.provider);
+      if (provider) {
+        emailService.sendBookingStatusUpdate({
+          booking: booking.toObject(),
+          customer: customer.toObject(),
+          provider: provider.toObject(),
+          statusReason: reason,
+          bookingLink: `${process.env.FRONTEND_URL}/bookings/${booking._id}`
+        }).catch(() => {
+          console.warn('Rejection email failed');
+        });
+      }
+    }
+  } catch (emailError) {
+    console.warn('Error sending rejection email:', emailError.message);
+  }
+
   res.status(200).json({
     success: true,
-    message: 'Booking rejected successfully',
+    message: '❌ Booking rejected. The customer has been notified.',
     data: booking,
   });
 });
@@ -153,9 +235,30 @@ const startBooking = asyncHandler(async (req, res) => {
 
   const booking = await bookingService.startBooking(bookingId, providerId);
 
+  // Send in-progress status email (with null checks)
+  try {
+    const customer = await User.findById(booking.customer);
+    const service = await Service.findById(booking.service);
+    if (customer && service && service.provider) {
+      const provider = await User.findById(service.provider);
+      if (provider) {
+        emailService.sendBookingStatusUpdate({
+          booking: booking.toObject(),
+          customer: customer.toObject(),
+          provider: provider.toObject(),
+          bookingLink: `${process.env.FRONTEND_URL}/bookings/${booking._id}`
+        }).catch(() => {
+          console.warn('In-progress email failed');
+        });
+      }
+    }
+  } catch (emailError) {
+    console.warn('Error sending in-progress email:', emailError.message);
+  }
+
   res.status(200).json({
     success: true,
-    message: 'Booking started successfully',
+    message: '⚙️ Service started! The customer has been notified that work is in progress.',
     data: booking,
   });
 });
@@ -172,9 +275,30 @@ const completeBooking = asyncHandler(async (req, res) => {
 
   const booking = await bookingService.completeBooking(bookingId, providerId, finalPrice);
 
+  // Send completion status email (with null checks)
+  try {
+    const customer = await User.findById(booking.customer);
+    const service = await Service.findById(booking.service);
+    if (customer && service && service.provider) {
+      const provider = await User.findById(service.provider);
+      if (provider) {
+        emailService.sendBookingStatusUpdate({
+          booking: booking.toObject(),
+          customer: customer.toObject(),
+          provider: provider.toObject(),
+          bookingLink: `${process.env.FRONTEND_URL}/bookings/${booking._id}`
+        }).catch(() => {
+          console.warn('Completion email failed');
+        });
+      }
+    }
+  } catch (emailError) {
+    console.warn('Error sending completion email:', emailError.message);
+  }
+
   res.status(200).json({
     success: true,
-    message: 'Booking completed successfully',
+    message: '✨ Booking completed! The customer can now leave a review for your service.',
     data: booking,
   });
 });

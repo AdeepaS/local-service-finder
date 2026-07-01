@@ -3,6 +3,7 @@ const path = require('path')
 require('dotenv').config({ path: path.resolve(__dirname, '.env') })
 const app = require('./app')
 const connectDb = require('./config/db')
+require('./config/mail.config') // Initialize mail transporter on startup
 
 const PORT = process.env.PORT
 
