@@ -45,11 +45,11 @@ const createBooking = asyncHandler(async (req, res) => {
 
   // Send booking confirmation emails (with null checks)
   try {
-    const customer = await User.findById(booking.customer);
-    const service = await Service.findById(booking.service);
+    const customer = await User.findById(booking.customerId);
+    const service = await Service.findById(booking.serviceId);
     
-    if (customer && service && service.provider) {
-      const provider = await User.findById(service.provider);
+    if (customer && service && service.providerId) {
+      const provider = await User.findById(service.providerId);
       if (provider) {
         // Send to customer
         emailService.sendBookingConfirmation({
