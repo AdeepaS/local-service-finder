@@ -82,15 +82,20 @@ function AddressManager() {
         await createAddress(form);
       }
       const msg = isEdit ? 'Address updated' : 'Address added';
-      toast.success('✅ ' + msg + ' successfully!', {
+      toast.success(msg + ' successfully!', {
         duration: 3000,
-        position: 'top-center',
+        position: 'bottom-center',
         style: {
-          background: '#10b981',
-          color: '#fff',
-          fontWeight: 'bold',
-          padding: '16px',
+          background: '#bbf7d0',
+          color: '#166534',
+          fontWeight: '600',
+          padding: '14px 18px',
           borderRadius: '8px',
+          border: '1px solid #86efac',
+        },
+        iconTheme: {
+          primary: '#16a34a',
+          secondary: '#bbf7d0',
         },
       });
       setShowForm(false);
@@ -119,15 +124,20 @@ function AddressManager() {
     if (!window.confirm('Delete this address?')) return;
     try {
       await deleteAddress(addressId);
-      toast.success('✅ Address deleted successfully!', {
+      toast.success('Address deleted successfully!', {
         duration: 3000,
-        position: 'top-center',
+        position: 'bottom-center',
         style: {
-          background: '#10b981',
-          color: '#fff',
-          fontWeight: 'bold',
-          padding: '16px',
+          background: '#bbf7d0',
+          color: '#166534',
+          fontWeight: '600',
+          padding: '14px 18px',
           borderRadius: '8px',
+          border: '1px solid #86efac',
+        },
+        iconTheme: {
+          primary: '#16a34a',
+          secondary: '#bbf7d0',
         },
       });
       loadAddresses();
@@ -151,15 +161,20 @@ function AddressManager() {
   const handleSetDefault = async (addressId) => {
     try {
       await setDefaultAddress(addressId);
-      toast.success('✅ Default address updated!', {
+      toast.success('Default address updated!', {
         duration: 3000,
-        position: 'top-center',
+        position: 'bottom-center',
         style: {
-          background: '#10b981',
-          color: '#fff',
-          fontWeight: 'bold',
-          padding: '16px',
+          background: '#bbf7d0',
+          color: '#166534',
+          fontWeight: '600',
+          padding: '14px 18px',
           borderRadius: '8px',
+          border: '1px solid #86efac',
+        },
+        iconTheme: {
+          primary: '#16a34a',
+          secondary: '#bbf7d0',
         },
       });
       loadAddresses();

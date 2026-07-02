@@ -67,15 +67,20 @@ function ProfileEditor() {
       await refreshProfile();
       const msg = 'Profile updated successfully';
       setProfileMsg(msg + '.');
-      toast.success('✅ ' + msg + '!', {
+      toast.success(msg + '!', {
         duration: 3000,
-        position: 'top-center',
+        position: 'bottom-center',
         style: {
-          background: '#10b981',
-          color: '#fff',
-          fontWeight: 'bold',
-          padding: '16px',
+          background: '#bbf7d0',
+          color: '#166534',
+          fontWeight: '600',
+          padding: '14px 18px',
           borderRadius: '8px',
+          border: '1px solid #86efac',
+        },
+        iconTheme: {
+          primary: '#16a34a',
+          secondary: '#bbf7d0',
         },
       });
     } catch (err) {
@@ -126,15 +131,20 @@ function ProfileEditor() {
       );
       const msg = 'Password changed successfully';
       setPasswordMsg(msg + '.');
-      toast.success('✅ ' + msg + '!', {
+      toast.success(msg + '!', {
         duration: 3000,
-        position: 'top-center',
+        position: 'bottom-center',
         style: {
-          background: '#10b981',
-          color: '#fff',
-          fontWeight: 'bold',
-          padding: '16px',
+          background: '#bbf7d0',
+          color: '#166534',
+          fontWeight: '600',
+          padding: '14px 18px',
           borderRadius: '8px',
+          border: '1px solid #86efac',
+        },
+        iconTheme: {
+          primary: '#16a34a',
+          secondary: '#bbf7d0',
         },
       });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });

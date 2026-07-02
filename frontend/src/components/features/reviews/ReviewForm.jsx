@@ -30,15 +30,20 @@ function ReviewForm({ serviceId, onSuccess }) {
       const response = await createReview({ serviceId, rating: Number(rating), comment: comment.trim() || undefined });
       setSuccess(true);
       setComment('');
-      toast.success('⭐ ' + (response?.data?.message || 'Review submitted successfully!'), {
+      toast.success((response?.data?.message || 'Review submitted successfully!'), {
         duration: 4000,
-        position: 'top-center',
+        position: 'bottom-center',
         style: {
-          background: '#10b981',
-          color: '#fff',
-          fontWeight: 'bold',
-          padding: '16px',
+          background: '#bbf7d0',
+          color: '#166534',
+          fontWeight: '600',
+          padding: '14px 18px',
           borderRadius: '8px',
+          border: '1px solid #86efac',
+        },
+        iconTheme: {
+          primary: '#16a34a',
+          secondary: '#bbf7d0',
         },
       });
       onSuccess?.();
